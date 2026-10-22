@@ -176,31 +176,37 @@ Each step can be executed individually from PowerShell:
 # 1. Diagnose connection and verify ADB state (read-only):
 powershell -File .\scripts\diagnose.ps1 -FireTvIp 192.168.1.50
 
-# 2. Fetch and vendor upstream third-party sources:
+# 2. Run the comprehensive automated test suite (33 unit & mock tests):
+powershell -File .\scripts\test-suite.ps1
+
+# 3. Fetch and vendor upstream third-party sources:
 powershell -File .\scripts\get-sources.ps1
 
-# 3. Patch and prepare Wii launcher source tree for Fire OS:
+# 4. Optional: Bootstrap Android SDK Platform 34 & Build-Tools locally:
+powershell -File .\scripts\setup-android-sdk.ps1
+
+# 5. Patch and prepare Wii launcher source tree for Fire OS:
 powershell -File .\scripts\prepare-launcher.ps1
 
-# 4. Install TV Bro browser (with hash verification):
+# 6. Install TV Bro browser (with hash verification):
 powershell -File .\scripts\install-browser.ps1 -FireTvIp 192.168.1.50
 
-# 5. Build and install custom Wii launcher:
+# 7. Build and install custom Wii launcher (or use -BuildOnly for compilation):
 powershell -File .\scripts\build-launcher.ps1 -FireTvIp 192.168.1.50
 
-# 6. Attempt standard HOME activity registration (never disables stock HOME):
+# 8. Attempt standard HOME activity registration (never disables stock HOME):
 powershell -File .\scripts\activate-home.ps1 -FireTvIp 192.168.1.50
 
-# 7. Generate a read-only debloat preview plan:
+# 9. Generate a read-only debloat preview plan:
 powershell -File .\scripts\plan-debloat.ps1 -FireTvIp 192.168.1.50
 
-# 8. Apply debloat plan (requires explicit confirmation token):
+# 10. Apply debloat plan (requires explicit confirmation token):
 powershell -File .\scripts\apply-debloat.ps1 -FireTvIp 192.168.1.50
 
-# 9. Verify device configuration and installed apps:
+# 11. Verify device configuration and installed apps:
 powershell -File .\scripts\verify.ps1 -FireTvIp 192.168.1.50
 
-# 10. Instant Rollback: Restore all packages modified by this toolkit:
+# 12. Instant Rollback: Restore all packages modified by this toolkit:
 powershell -File .\scripts\restore.ps1 -FireTvIp 192.168.1.50
 ```
 
@@ -267,24 +273,31 @@ To build the launcher APK locally on your Windows machine:
 firestick-wii/
 ├── .github/
 │   └── workflows/
-│       └── build-launcher.yml    # Automated cloud APK build workflow
+│       └── build-launcher.yml    # CI test suite & cloud APK build workflow
 ├── config/
 │   └── preferences.json          # Configuration parameters & app IDs
+├── dist/                         # Precompiled launcher binaries
+│   └── firestick-wii-launcher.apk # Ready-to-deploy Wii Launcher (755 KB)
 ├── docs/
+│   ├── CHANGELOG.md              # Technical log of changes, bug fixes & tests
 │   ├── SAFETY.md                 # Detailed safety bounds & limits
 │   └── TEST-MATRIX.md            # Hardware & feature test verification matrix
+├── reports/
+│   └── TEST-REPORT.md            # Technical acceptance test report (33/33 tests passed)
 ├── scripts/
 │   ├── activate-home.ps1         # Standard Android HOME assignment attempt
 │   ├── apply-debloat.ps1         # Gated debloat execution with logging
-│   ├── build-launcher.ps1        # Gradle compile and deployment runner
-│   ├── common.ps1                # Core ADB wrappers, logging, and error handling
+│   ├── build-launcher.ps1        # Gradle compile and deployment runner (-BuildOnly supported)
+│   ├── common.ps1                # Core ADB wrappers, smart ADB discovery, logging & error handling
 │   ├── diagnose.ps1              # Network and USB connection diagnostics
 │   ├── get-sources.ps1           # Clones & vendors upstream wii-tv & dumbtv
-│   ├── install-browser.ps1       # TV Bro download and verification
+│   ├── install-browser.ps1       # TV Bro download and verification (-DownloadOnly supported)
 │   ├── plan-debloat.ps1          # Generates read-only debloat proposal
 │   ├── prepare-launcher.ps1      # Patches Java & XML for Fire TV optimization
 │   ├── restore.ps1               # Rollback engine to re-enable altered packages
 │   ├── self-test.ps1             # Local static configuration checker
+│   ├── setup-android-sdk.ps1     # Automated local Android SDK bootstrapper (API 34)
+│   ├── test-suite.ps1            # 33-test automated test suite with full mock ADB simulation
 │   └── verify.ps1                # Verifies device state post-install
 ├── third_party/                  # Vendored upstream sources (MIT licensed)
 │   ├── dumbtv/                   # Upstream package list snapshot

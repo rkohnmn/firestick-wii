@@ -1,33 +1,23 @@
 FIRESTICK-WII — ONE REPOSITORY / WINDOWS 10
 
-1. Connect the Fire Stick's HDMI output to a TV/monitor.
+1. Connect the Fire Stick's HDMI output to a TV/monitor (not a PC HDMI port).
    The PC's Micro-USB may power the Stick but may not enable ADB.
    The MT65xx Preloader driver does NOT replace Android ADB.
-2. Ensure it boots, and enable/authorize ADB using an alternate
-   remote method (TV HDMI-CEC, Fire TV phone app, or OTG input).
-3. Ensure adb and git are on PATH. For compiling the launcher, install
-   JDK 17+ and Android SDK Platform 34 / Build-tools 34.0.0.
-4. Double-click run.bat (USB ADB), or from PowerShell run:
-
+2. Ensure it boots, and enable/authorize ADB using your remote or mobile app:
+   Settings > My Fire TV > Developer Options > ADB Debugging = ON.
+3. Prebuilt launcher APK is ready in dist/firestick-wii-launcher.apk.
+   If you wish to recompile locally, JDK 21 / Android SDK 34 are supported.
+4. Run the automated test suite anytime (no hardware needed):
+   powershell -ExecutionPolicy Bypass -File .\scripts\test-suite.ps1
+5. To start the guided setup, double-click run.bat (USB ADB), or run:
    powershell -ExecutionPolicy Bypass -File .\setup.ps1 -FireTvIp 192.168.1.50
-
-   Replace 192.168.1.50 with the Stick's local IP address.
-5. Follow prompts to test TV Bro, install AirScreen from Amazon Appstore
-   and test both phones, and test the Wii launcher.
-6. Optional: approve a reversible debloat plan after reading it.
-7. HOME replacement may be blocked by Fire OS. Try only after tests:
+   (Replace 192.168.1.50 with your Stick's actual local IP address).
+6. Follow prompts to test TV Bro, install official AirScreen from Amazon Appstore,
+   test iPhone AirPlay and Pixel casting, and test the Wii launcher.
+7. Optional: approve a reversible debloat plan after reviewing it.
+8. HOME replacement may be blocked by modern Fire OS. Try only after manual validation:
    powershell -File .\scripts\activate-home.ps1 -FireTvIp YOUR_IP
-8. Restore only our recorded changes:
+9. Rollback anytime (restores only packages modified by this toolkit):
    powershell -File .\scripts\restore.ps1 -FireTvIp YOUR_IP
 
-Before uploading this to GitHub as your SINGLE source repository:
-   powershell -ExecutionPolicy Bypass -File .\scripts\get-sources.ps1
-   git init
-   git add .
-   git commit -m "Initial firestick-wii"
-Then add your GitHub remote and push. third_party/ now includes upstream
-wii-tv + dumbtv MIT-licensed source and required notices.
-
-The ZIP does not contain third-party APK binaries or upstream source trees
-until the get-sources script is run. This integration toolkit has not been
-tested on your actual Stick. See README.md for details and safety rules.
+See README.md and reports/TEST-REPORT.md for full technical details.

@@ -5,9 +5,9 @@ $ErrorActionPreference='Stop'
 $list=Join-Path $script:Root 'third_party/dumbtv/data/fireos/packages.txt'
 $never=Join-Path $script:Root 'third_party/dumbtv/data/fireos/never-disable.txt'
 if (-not (Test-Path $list) -or -not (Test-Path $never)) { throw 'dumbtv source lists missing. Run scripts/get-sources.ps1.' }
-$installed=@(Shell @('pm','list','packages') | ForEach-Object { $_ -replace '^package:','' })
-$disabled=@(Shell @('pm','list','packages','-d') | ForEach-Object { $_ -replace '^package:','' })
-$thirdParty=@(Shell @('pm','list','packages','-3') | ForEach-Object { $_ -replace '^package:','' })
+$installed=@(Shell @('pm','list','packages') | ForEach-Object { ($_ -replace '^package:','').Trim() })
+$disabled=@(Shell @('pm','list','packages','-d') | ForEach-Object { ($_ -replace '^package:','').Trim() })
+$thirdParty=@(Shell @('pm','list','packages','-3') | ForEach-Object { ($_ -replace '^package:','').Trim() })
 $protected=@(Get-Content $never | ForEach-Object { ($_ -split '#')[0].Trim() } | Where-Object { $_ -match '^[a-zA-Z][A-Za-z0-9_.]+$' })
 $stock=@('com.amazon.vizzini','com.amazon.vizzini.ftvcds','com.amazon.cloud9')
 $knownCritical=@('com.amazon.firehomestarter','com.amazon.tv.launcher','com.amazon.device.software.ota', 'com.amazon.tv.settings','com.amazon.venezia','com.amazon.avod.thirdpartyclient')

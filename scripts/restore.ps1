@@ -6,14 +6,28 @@ $state=PrivateDir 'state'
 $log=Join-Path $state 'disabled-by-firestick-wii.txt'
 if (Test-Path $log) {
   Say 'Restoring only packages journaled by firestick-wii. Existing disabled states were never touched.'
-  foreach($pkg in (Get-Content $log | Select-Object -Unique)) {
-    if ($pkg -match '^[a-zA-Z][a-zA-Z0-9_.]+$') {
-      $out=& adb -s $script:AdbSerial shell pm enable --user 0 $pkg 2>&1
-      Write-Host "$pkg : $($out -join ' ')"
-      if ($LASTEXITCODE -ne 0) { Write-Warning "Failed to enable $pkg; recovery log retained."; return }
+  $pkgs = @(Get-Content $log | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^[a-zA-Z][a-zA-Z0-9_.]+$' } | Select-Object -Unique)
+  $failed = @()
+  foreach($pkg in $pkgs) {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+      $out = & adb -s $script:AdbSerial shell pm enable --user 0 $pkg 2>&1
+    } finally {
+      $ErrorActionPreference = $prev
+    }
+    Write-Host "$pkg : $($out -join ' ')"
+    if ($LASTEXITCODE -ne 0 -or ($out -join ' ') -match 'Exception|Error') {
+      Write-Warning "Failed to enable $pkg"
+      $failed += $pkg
     }
   }
-  Rename-Item $log ('disabled-restored-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.txt')
+  if ($failed.Count -eq 0) {
+    Rename-Item $log ('disabled-restored-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.txt')
+    Say 'All journaled packages successfully restored.'
+  } else {
+    Write-Warning "Some packages could not be enabled: $($failed -join ', '). Recovery log retained at $log."
+  }
 }
 $home=(Join-Path $state 'previous-home.txt')
 if (Test-Path $home) {

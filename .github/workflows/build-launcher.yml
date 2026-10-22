@@ -19,15 +19,14 @@ jobs:
       - name: Fetch upstream source if not yet committed
         shell: pwsh
         run: ./scripts/get-sources.ps1
-      - name: Prepare Fire TV Wii launcher
+      - name: Run Automated Test Suite
         shell: pwsh
-        run: ./scripts/prepare-launcher.ps1
-      - name: Compile APK
+        run: ./scripts/test-suite.ps1
+      - name: Compile Wii Launcher APK
         shell: pwsh
-        working-directory: build/wii-tv/launcher
-        run: ./gradlew.bat :app:assembleRelease --no-daemon --console=plain
+        run: ./scripts/build-launcher.ps1 -BuildOnly
       - uses: actions/upload-artifact@v4
         with:
-          name: firestick-wii-unsigned-release-debugkey
-          path: build/wii-tv/launcher/app/build/outputs/apk/release/*.apk
+          name: firestick-wii-launcher-release
+          path: dist/*.apk
           if-no-files-found: error

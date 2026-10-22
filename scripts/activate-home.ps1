@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 . "$PSScriptRoot/common.ps1"
 [void](SelectDevice $Serial $FireTvIp)
 $installed=(Shell @('pm','list','packages')) -join "`n"
-if ($installed -notmatch '(?m)^package:io\.github\.firestickwii$') { throw 'Install and test Wii launcher first.' }
+if ($installed -notmatch '(?m)^package:io\.github\.firestickwii\r?$') { throw 'Install and test Wii launcher first.' }
 Say 'IMPORTANT: Fire OS may reject a third-party HOME default. We will NOT disable the stock launcher.'
 Say 'First verify the Wii menu has actually opened on the HDMI display and Settings still works.'
 ConfirmLiteral 'I confirm Wii menu, input, and Settings work and I have an ADB recovery method' 'WORKS'

@@ -45,7 +45,7 @@ if (-not $SkipBrowser) {
   Say 'TEST TV Bro on HDMI display. Navigate https://example.com and your ordinary websites.'
   $answer=Read-Host 'Type BROWSER only if TV Bro works with navigation and HTTPS (or press Enter to skip)'
   if ($answer -ceq 'BROWSER') {
-    'Manual browser test confirmed' | Set-Content -Encoding ASCII "$PSScriptRoot/state/browser-tested.ok"
+    'Manual browser test confirmed' | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'browser-tested.ok')
   }
 }
 Say 'AIRSCREEN: Open Amazon Appstore on Fire TV and install official AirScreen by Ionitech.'
@@ -53,14 +53,14 @@ Say 'Then test iPhone via Control Center > Screen Mirroring; Pixel via Cast/Goog
 Say 'Both phones must have actual successful screen sharing, not just receiver detection.'
 $answer=Read-Host 'Type MIRROR only if BOTH Pixel and iPhone mirroring work (or Enter to skip)'
 if ($answer -ceq 'MIRROR') {
-  'Manual iPhone + Pixel tests confirmed' | Set-Content -Encoding ASCII "$PSScriptRoot/state/mirroring-tested.ok"
+  'Manual iPhone + Pixel tests confirmed' | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'mirroring-tested.ok')
 }
 if (-not $SkipLauncher) {
   & "$PSScriptRoot/scripts/build-launcher.ps1" -Serial $dev
   Say 'TEST Wii menu navigation and the Settings button on your HDMI display.'
   $answer=Read-Host 'Type WII only if the launcher and Settings work (or Enter to skip)'
   if ($answer -ceq 'WII') {
-    'Manual launcher navigation + Settings confirmed' | Set-Content -Encoding ASCII "$PSScriptRoot/state/launcher-tested.ok"
+    'Manual launcher navigation + Settings confirmed' | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'launcher-tested.ok')
     Say 'You can now separately attempt HOME takeover with scripts/activate-home.ps1. Fire OS may reject it.'
   }
 }

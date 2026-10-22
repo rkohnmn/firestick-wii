@@ -1,12 +1,9 @@
-param([string]$Serial,[string]$FireTvIp)
+param([string]$Serial,[string]$FireTvIp,[switch]$DownloadOnly)
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot/common.ps1"
-[void](SelectDevice $Serial $FireTvIp)
 $cfg = JsonPreferences
 $tag = $cfg.browser.releaseTag
 if ($tag -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw 'Unrecognized release tag.' }
-$api = [int](GetProp 'ro.build.version.sdk')
-if ($api -lt 26) { throw 'TV Bro 2.1.6 requires Android API 26 or later.' }
 $dest=PrivateDir 'downloads'
 $assetName = "tvbro-$($tag.Substring(1))-generic-geckoExcluded.apk"
 $apk=Join-Path $dest $assetName
@@ -31,6 +28,13 @@ $hash=(Get-FileHash -Algorithm SHA256 -Path $apk).Hash
 $record="tag=$tag`nfile=$assetName`nsha256=$hash`n"
 $record | Set-Content -Encoding ASCII (Join-Path $dest 'tvbro-checksum.txt')
 Say "SHA256: $hash (recorded locally; upstream signature not independently verified)"
+if ($DownloadOnly) {
+  Say "TV Bro APK downloaded and verified: $apk"
+  return
+}
+[void](SelectDevice $Serial $FireTvIp)
+$api = [int](GetProp 'ro.build.version.sdk')
+if ($api -lt 26) { throw 'TV Bro 2.1.6 requires Android API 26 or later.' }
 ConfirmLiteral 'Install this third-party APK from the official TV Bro GitHub release?' 'INSTALL'
 $out=Device @('install','-r',$apk)
 Write-Host ($out -join "`n")

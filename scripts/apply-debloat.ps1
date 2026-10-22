@@ -13,8 +13,8 @@ if (-not (Test-Path (Join-Path $dir 'mirroring-tested.ok'))) { throw 'Missing mi
 if (-not (Test-Path (Join-Path $dir 'launcher-tested.ok'))) { throw 'Missing launcher-tested.ok. Create ONLY after confirming Wii launch and access to Settings.' }
 $items=@(Import-Csv $plan)
 if (-not $items.Count) { Say 'Nothing to disable.'; return }
-$currentlyDisabled=@(Shell @('pm','list','packages','-d') | ForEach-Object { $_ -replace '^package:','' })
-$allPackages=@(Shell @('pm','list','packages') | ForEach-Object { $_ -replace '^package:','' })
+$currentlyDisabled=@(Shell @('pm','list','packages','-d') | ForEach-Object { ($_ -replace '^package:','').Trim() })
+$allPackages=@(Shell @('pm','list','packages') | ForEach-Object { ($_ -replace '^package:','').Trim() })
 $log=Join-Path $dir 'disabled-by-firestick-wii.txt'
 if (Test-Path $log) { throw 'An earlier apply log exists. Restore before a new debloat pass; refusing to overwrite recovery log.' }
 $logFile=[IO.File]::Open($log,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
