@@ -1,0 +1,16 @@
+# Private device info, pairing data, and transient files
+backups/
+logs/
+build/
+downloads/
+state/
+*.keystore
+*.jks
+local.properties
+.gradle/
+**/.gradle/
+**/build/
+**/tools/adbkey/
+**/tools/venv/
+# Source archives can be vendored into third_party and committed (licences retained)
+third_party/.staging/

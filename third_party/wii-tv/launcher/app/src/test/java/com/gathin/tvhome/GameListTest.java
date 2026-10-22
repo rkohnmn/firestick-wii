@@ -1,0 +1,79 @@
+package com.gathin.tvhome;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import org.junit.Test;
+
+public class GameListTest {
+
+    @Test
+    public void readsTitleRomColourAndCore() {
+        List<GameList.Game> games = GameList.parse(
+                "# title | rom | colour | core\n"
+                        + "Fire Red | /storage/emulated/0/RetroArch/roms/gba/firered.gba | #E8432E\n"
+                        + "  Tetris|/sdcard/RetroArch/roms/gb/tetris.gb||gambatte  \r\n");
+        assertEquals(2, games.size());
+        GameList.Game a = games.get(0);
+        assertEquals("Fire Red", a.title);
+        assertEquals("/storage/emulated/0/RetroArch/roms/gba/firered.gba", a.rom);
+        assertEquals(0xFFE8432E, a.color);
+        assertEquals("mgba", a.core);
+        GameList.Game b = games.get(1);
+        assertEquals("Tetris", b.title);
+        assertEquals("gambatte", b.core);
+        assertTrue(contains(GameList.PALETTE, b.color));
+    }
+
+    @Test
+    public void skipsLinesItCannotLaunch() {
+        List<GameList.Game> games = GameList.parse(
+                "\n# comment\n"
+                        + "no rom here\n"
+                        + "Relative | roms/gba/x.gba\n"
+                        + "Unknown system | /sdcard/roms/x.iso\n"
+                        + "Bad core | /sdcard/roms/x.gba | | ../../evil\n"
+                        + "Good | /sdcard/roms/ok.gba\n");
+        assertEquals(1, games.size());
+        assertEquals("Good", games.get(0).title);
+    }
+
+    @Test
+    public void emptyTitleFallsBackToTheFileName() {
+        GameList.Game g = GameList.parse(" | /sdcard/RetroArch/roms/gba/Mi Juego.v2.gba").get(0);
+        assertEquals("Mi Juego.v2", g.title);
+    }
+
+    @Test
+    public void colourIsStableAndOnlyHexIsAccepted() {
+        assertEquals(0, GameList.parseColor("red"));
+        assertEquals(0, GameList.parseColor("#FFF"));
+        assertEquals(0xFF00FF80, GameList.parseColor("#00ff80"));
+        int first = GameList.parse("Same | /x/a.gba | nope").get(0).color;
+        int again = GameList.parse("Same | /y/b.gba").get(0).color;
+        assertEquals(first, again);
+    }
+
+    @Test
+    public void defaultCoreCoversTheHandhelds() {
+        assertEquals("mgba", GameList.defaultCore("/a/B.GBA"));
+        assertEquals("mgba", GameList.defaultCore("/a/b.gbc"));
+        assertNull(GameList.defaultCore("/a/b.zip"));
+    }
+
+    @Test
+    public void systemIsNamedByTheExtension() {
+        assertEquals("Game Boy Advance", GameList.system("/r/Juego.GBA"));
+        assertEquals("Game Boy Color", GameList.system("/r/a.gbc"));
+        assertEquals("Game Boy", GameList.system("/r/a.gb"));
+        assertNull(GameList.system("/r/a.sfc"));
+    }
+
+    private static boolean contains(int[] list, int v) {
+        for (int x : list) if (x == v) return true;
+        return false;
+    }
+}

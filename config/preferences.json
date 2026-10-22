@@ -1,0 +1,14 @@
+{
+  "project": "firestick-wii",
+  "target": "Amazon Fire TV Stick (model not yet verified)",
+  "windows": "10",
+  "launcherApplicationId": "io.github.firestickwii",
+  "browser": { "provider": "truefedex/tv-bro", "releaseTag": "v2.1.6", "variant": "geckoExcluded" },
+  "mirroring": { "receiver": "AirScreen", "installFrom": "official Amazon Appstore", "protocols": ["AirPlay", "Google Cast"] },
+  "keepStreamingApps": true,
+  "removeAlexa": true,
+  "dnsFiltering": false,
+  "smartTube": false,
+  "autoOtaBlocking": false,
+  "keepStockLauncherEnabled": true
+}

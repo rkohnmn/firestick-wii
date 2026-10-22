@@ -1,0 +1,33 @@
+name: Build Wii launcher APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prepare-launcher.ps1'
+      - 'third_party/**'
+      - '.github/workflows/build-launcher.yml'
+jobs:
+  android:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Fetch upstream source if not yet committed
+        shell: pwsh
+        run: ./scripts/get-sources.ps1
+      - name: Prepare Fire TV Wii launcher
+        shell: pwsh
+        run: ./scripts/prepare-launcher.ps1
+      - name: Compile APK
+        shell: pwsh
+        working-directory: build/wii-tv/launcher
+        run: ./gradlew.bat :app:assembleRelease --no-daemon --console=plain
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firestick-wii-unsigned-release-debugkey
+          path: build/wii-tv/launcher/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
