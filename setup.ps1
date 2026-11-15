@@ -17,6 +17,8 @@ if (-not $FireTvIp -and -not $Serial) {
 & "$PSScriptRoot/scripts/diagnose.ps1" -FireTvIp $FireTvIp -Serial $Serial
 $api=SelectDevice $Serial $FireTvIp
 $dev=$script:AdbSerial
+$fingerprint=GetProp 'ro.build.fingerprint'
+if ([string]::IsNullOrWhiteSpace($fingerprint) -or $fingerprint -match '[\r\n]') { throw 'Missing firmware identity; cannot record device-bound test gates.' }
 if ($api -lt 26) { throw 'The Wii project requires Android 8/API26 or newer.' }
 $session=Get-Date -Format 'yyyyMMdd-HHmmss'
 $folder=Join-Path (PrivateDir 'backups') $session
@@ -45,7 +47,7 @@ if (-not $SkipBrowser) {
   Say 'TEST TV Bro on HDMI display. Navigate https://example.com and your ordinary websites.'
   $answer=Read-Host 'Type BROWSER only if TV Bro works with navigation and HTTPS (or press Enter to skip)'
   if ($answer -ceq 'BROWSER') {
-    'Manual browser test confirmed' | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'browser-tested.ok')
+    @("adb-serial=$dev","build-fingerprint=$fingerprint",'test=browser') | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'browser-tested.ok')
   }
 }
 Say 'AIRSCREEN: Open Amazon Appstore on Fire TV and install official AirScreen by Ionitech.'
@@ -53,14 +55,14 @@ Say 'Then test iPhone via Control Center > Screen Mirroring; Pixel via Cast/Goog
 Say 'Both phones must have actual successful screen sharing, not just receiver detection.'
 $answer=Read-Host 'Type MIRROR only if BOTH Pixel and iPhone mirroring work (or Enter to skip)'
 if ($answer -ceq 'MIRROR') {
-  'Manual iPhone + Pixel tests confirmed' | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'mirroring-tested.ok')
+  @("adb-serial=$dev","build-fingerprint=$fingerprint",'test=mirroring') | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'mirroring-tested.ok')
 }
 if (-not $SkipLauncher) {
   & "$PSScriptRoot/scripts/build-launcher.ps1" -Serial $dev
   Say 'TEST Wii menu navigation and the Settings button on your HDMI display.'
   $answer=Read-Host 'Type WII only if the launcher and Settings work (or Enter to skip)'
   if ($answer -ceq 'WII') {
-    'Manual launcher navigation + Settings confirmed' | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'launcher-tested.ok')
+    @("adb-serial=$dev","build-fingerprint=$fingerprint",'test=launcher') | Set-Content -Encoding ASCII (Join-Path (PrivateDir 'state') 'launcher-tested.ok')
     Say 'You can now separately attempt HOME takeover with scripts/activate-home.ps1. Fire OS may reject it.'
   }
 }

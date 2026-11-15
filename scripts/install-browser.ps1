@@ -4,6 +4,10 @@ $ErrorActionPreference='Stop'
 $cfg = JsonPreferences
 $tag = $cfg.browser.releaseTag
 if ($tag -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw 'Unrecognized release tag.' }
+# Version-specific checksum documented by this repository's prior audited asset test.
+# Not an upstream signature; review and update this pin deliberately when upgrading.
+if ($tag -cne 'v2.1.6') { throw 'No reviewed SHA-256 pin for this release. Obtain and review an approved hash before upgrading.' }
+$expectedSha256='D8634EDFE8D94B4FB9A52005D68A090A7F1E85B7F39C2CF01A25DC9DD60942B2'
 $dest=PrivateDir 'downloads'
 $assetName = "tvbro-$($tag.Substring(1))-generic-geckoExcluded.apk"
 $apk=Join-Path $dest $assetName
@@ -25,6 +29,9 @@ if (-not (Test-Path $apk)) {
   if ((Get-Item $apk).Length -ne [long]$asset.size) { throw 'APK file length differs from published release metadata.' }
 }
 $hash=(Get-FileHash -Algorithm SHA256 -Path $apk).Hash
+if ($hash -cne $expectedSha256) {
+  throw 'TV Bro APK hash mismatch against previously reviewed release asset. No APK will be installed; delete suspect cache and review the upstream asset.'
+}
 $record="tag=$tag`nfile=$assetName`nsha256=$hash`n"
 $record | Set-Content -Encoding ASCII (Join-Path $dest 'tvbro-checksum.txt')
 Say "SHA256: $hash (recorded locally; upstream signature not independently verified)"
