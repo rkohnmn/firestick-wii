@@ -24,6 +24,10 @@ foreach ($line in (Get-Content $list)) {
 }
 $dir=PrivateDir 'state'
 $script:AdbSerial | Set-Content -Encoding ASCII (Join-Path $dir 'debloat-device.txt')
+# Bind the reviewed plan to the firmware identity as well as the ADB endpoint.
+$fingerprint = GetProp 'ro.build.fingerprint'
+if ([string]::IsNullOrWhiteSpace($fingerprint) -or $fingerprint -match '[\r\n]') { throw 'Cannot bind plan: missing or invalid device build fingerprint.' }
+$fingerprint | Set-Content -Encoding UTF8 (Join-Path $dir 'debloat-fingerprint.txt')
 $path=Join-Path $dir 'debloat-plan.csv'
 $plan | Export-Csv -Path $path -NoTypeInformation -Encoding UTF8
 Say "Read-only debloat plan saved to $path ($($plan.Count) packages). No apps removed."
